@@ -1,10 +1,13 @@
 import { Avatar } from "./Avatar";
 import { Comment } from "./Comment";
-import { format, formatDistanceToNow} from "date-fns";
+import { format, formatDistanceToNow } from "date-fns";
 import ptBR from "date-fns/locale/pt-BR";
 import styles from "./Post.module.css";
+import { useState } from "react";
 
 export function Post({ author, content, publishedAt }) {
+	const [comments, setComments] = useState(['Post muito bacana!'])
+	const [newCommentText, setNewCommentText] = useState("")
 	const publishedDateFormatted = format(
 		publishedAt,
 		"d 'de' LLLL 'às' HH:mm'h'",
@@ -13,8 +16,19 @@ export function Post({ author, content, publishedAt }) {
 
 	const publishedDateRelativeToNow = formatDistanceToNow(publishedAt, {
 		locale: ptBR,
-		addSuffix: true
-	})
+		addSuffix: true,
+	});
+
+	function handleCreateNewComment(){
+		event.preventDefault();
+
+		setComments([...comments, newCommentText])
+		setNewCommentText("")
+ 	}
+
+	function handleNewCommentChange(){
+		setNewCommentText(event.target.value);
+	}
 
 	return (
 		<article className={styles.post}>
@@ -34,28 +48,36 @@ export function Post({ author, content, publishedAt }) {
 				</time>
 			</header>
 			<div className={styles.content}>
-				{content.map((line, index)=>{
-					if(line.type === "paragraph"){
-						return <p key={index}>{line.content}</p>
-					}else if(line.type === "link"){
-						return <p key={index}><a href="">{line.content}</a></p>
+				{content.map((line, index) => {
+					if (line.type === "paragraph") {
+						return <p key={index}>{line.content}</p>;
+					} else if (line.type === "link") {
+						return (
+							<p key={index}>
+								<a href=''>{line.content}</a>
+							</p>
+						);
 					}
 				})}
 			</div>
 
-			<form className={styles.commentForm}>
+			<form onSubmit={handleCreateNewComment} className={styles.commentForm}>
 				<strong>Deixe seu feedback</strong>
-				<textarea placeholder='Deixe um comentário' />
+				<textarea 
+				name="comment" 
+				placeholder='Deixe um comentário' 
+				value={newCommentText}
+				onChange={handleNewCommentChange}
+				/>
 				<footer>
 					<button type='submit'>Comentar</button>
 				</footer>
 			</form>
 
 			<div className={styles.commentList}>
-				<Comment />
-				<Comment />
-				<Comment />
-				<Comment />
+				{comments.map((comment, index) => (
+					<Comment key={index} content={comment} />
+				))}
 			</div>
 		</article>
 	);
